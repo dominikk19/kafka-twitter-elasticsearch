@@ -1,25 +1,124 @@
 version: "3.8"
 
 services:
-  zookeeper:
-    container_name: zookeeper
+  zookeeper-1:
+    container_name: zookeeper-1
     image: wurstmeister/zookeeper:latest
+    hostname: zookeeper1
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888
+    volumes:
+      - ./kafka-multiple-schema-registry/zookeeper1/data:/data
+      - ./kafka-multiple-schema-registry/zookeeper1/datalog:/datalog
     ports:
       - "2181:2181"
-  kafka:
-    container_name: kafka
+  zookeeper-2:
+    container_name: zookeeper-2
+    image: wurstmeister/zookeeper:latest
+    hostname: zookeeper2
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2182
+      ZOOKEEPER_SERVERS: server.1=zookeeper2:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888
+    volumes:
+      - ./kafka-multiple-schema-registry/zookeeper2/data:/data
+      - ./kafka-multiple-schema-registry/zookeeper2/datalog:/datalog
+    ports:
+      - "2182:2182"
+  zookeeper-3:
+    container_name: zookeeper-3
+    image: wurstmeister/zookeeper:latest
+    hostname: zookeeper3
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 2183
+      ZOOKEEPER_SERVERS: server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888
+    volumes:
+      - ./kafka-multiple-schema-registry/zookeeper3/data:/data
+      - ./kafka-multiple-schema-registry/zookeeper3/datalog:/datalog
+    ports:
+      - "2183:2183"
+
+  kafka-1:
+    container_name: kafka-1
     image: wurstmeister/kafka:latest
+    hostname: kafka1
     ports:
       - "9092:9092"
     environment:
-      BROKER_ID: 666
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
+      KAFKA_BROKER_ID: 666
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181,zookeeper2:2182,zookeeper3:2183
+      KAFKA_LISTENERS: INTERNAL://:19092,EXTERNAL://:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:19092,EXTERNAL://localhost:9092
+    volumes:
+      - ./kafka-multiple-schema-registry/kafka1/data:/var/lib/kafka/data
     depends_on:
-      - zookeeper
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+
+  kafka-2:
+    container_name: kafka-2
+    image: wurstmeister/kafka:latest
+    hostname: kafka2
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 667
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181,zookeeper2:2182,zookeeper3:2183
+      KAFKA_LISTENERS: INTERNAL://:19093,EXTERNAL://:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:19093,EXTERNAL://localhost:9093
+    volumes:
+      - ./kafka-multiple-schema-registry/kafka2/data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+
+  kafka-3:
+    container_name: kafka-3
+    image: wurstmeister/kafka:latest
+    hostname: kafka3
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 668
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181,zookeeper2:2182,zookeeper3:2183
+      KAFKA_LISTENERS: INTERNAL://:19094,EXTERNAL://:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:19094,EXTERNAL://localhost:9094
+    volumes:
+      - ./kafka-multiple-schema-registry/kafka3/data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+
+  kafka-schema-registry:
+    container_name: kafka-schema-registry
+    image: confluentinc/cp-schema-registry:latest
+    hostname: kafka-schema-registry
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: kafka-schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka1:19092,PLAINTEXT://kafka2:19093,PLAINTEXT://kafka3:19094'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
   akhq:
     container_name: akhq
     image: tchiotludo/akhq:latest
@@ -29,8 +128,14 @@ services:
       AKHQ_CONFIGURATION: |
         akhq:
           connections:
-            kafka-dev:
+            kafka-server-1:
               properties:
-                bootstrap.servers: "kafka:9093"
+                bootstrap.servers: "kafka1:19092"
+            kafka-server-2:
+              properties:
+                bootstrap.servers: "kafka2:19093"
+            kafka-server-3:
+              properties:
+                bootstrap.servers: "kafka3:19094"
     depends_on:
-      - kafka
+      - kafka-1

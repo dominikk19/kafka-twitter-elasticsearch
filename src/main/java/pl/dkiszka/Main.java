@@ -33,13 +33,13 @@ public class Main {
 
         kafkaTwitterProducer = KafkaTwitterProducerFactory.createKafkaTwitterProducer();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
-            logger.info("stopping application");
-            client.stop();
-            logger.info("Twitter client stopped");
-            kafkaTwitterProducer.close();
-            logger.info("Kafka producer stopped");
-        }));
+//        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+//            logger.info("stopping application");
+//            client.stop();
+//            logger.info("Twitter client stopped");
+//            kafkaTwitterProducer.close();
+//            logger.info("Kafka producer stopped");
+//        }));
 
         while (!client.isDone()) {
             Try.of(() -> msgQueue.poll(5, TimeUnit.SECONDS))

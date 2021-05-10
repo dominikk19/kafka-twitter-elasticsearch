@@ -18,7 +18,7 @@ public class PropertiesReading {
 
     public Properties read() {
         var prop = new Properties();
-        var inputStream = getClass().getClassLoader().getResourceAsStream("application.properties");
+        var inputStream = getClass().getClassLoader().getResourceAsStream("application-dk.properties");
 
         Try.run(() -> prop.load(inputStream))
                 .onSuccess(ignore -> log.info("Read properties"))

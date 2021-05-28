@@ -35,7 +35,18 @@ class KafkaTwitterProducer {
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
-        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5")   ;
+        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
+
+        //high throughput producer
+        //compression
+        //  gzip, lz4, snappy
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32*1024)); //default 16KB
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+
+
+
+
         return properties;
     }
 

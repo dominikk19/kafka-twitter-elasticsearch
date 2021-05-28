@@ -43,7 +43,7 @@ class TwitterProducer {
         Hosts hosebirdHosts = new HttpHosts(Constants.STREAM_HOST);
         StatusesFilterEndpoint hosebirdEndpoint = new StatusesFilterEndpoint();
 
-        List<String> terms = Lists.newArrayList("COVID");
+        List<String> terms = Lists.newArrayList("COVID", "sport");
         hosebirdEndpoint.trackTerms(terms);
 
         Authentication hosebirdAuth = new OAuth1(consumerKey, consumerSecret, token, secret);

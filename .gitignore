@@ -98,3 +98,17 @@ fabric.properties
 
 application-dk.properties
 /.idea/
+/.idea/
+/.idea/checkstyleidea.tmp/
+/.idea/inspectionProfiles/
+/.idea/libraries/
+/.idea/sonarlint/
+/.idea/checkstyle-idea.xml
+/.idea/compiler.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/uiDesigner.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
+kafka-twitter-elasticsearch.iml

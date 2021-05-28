@@ -34,3 +34,14 @@ services:
                 bootstrap.servers: "kafka:9093"
     depends_on:
       - kafka
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:7.12.1
+    environment:
+      - "discovery.type=single-node"
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+
+

@@ -18,12 +18,12 @@ import java.util.concurrent.TimeUnit;
  * @project kafka-twitter-elasticsearch
  * @date 10.05.2021
  */
-public class Main {
+public class TwitterProducer {
     private Logger logger = LoggerFactory.getLogger("Main");
     private KafkaProducer<String, String> kafkaTwitterProducer;
 
     public static void main(String[] args) {
-        new Main().run();
+        new TwitterProducer().run();
     }
 
     public void run() {
